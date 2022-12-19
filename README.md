@@ -12,8 +12,16 @@ go get github.com/sirkon/errors
 Just use helper functions:
 
 ```go
-testlog.Log(errors.New("log entry"))
-testlog.Error(errors.New("some serious error"))
+testlog.Log(t, errors.New("log entry"))
+testlog.Error(t, errors.New("some serious error"))
+```
+
+or
+
+```go
+tl := testlog.New(t)
+tl.Log(errors.New("log entry"))
+tl.Error(errors.New("som serious error"))
 ```
 
 ## PS

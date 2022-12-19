@@ -11,6 +11,28 @@ const (
 	red  = "\033[1;31m"
 )
 
+// TestLog logger with stored TestingPrinter.
+type TestLog struct {
+	t TestingPrinter
+}
+
+// New creates TestLogInstance.
+func New(t TestingPrinter) TestLog {
+	return TestLog{
+		t: t,
+	}
+}
+
+// Log logs an error.
+func (tl TestLog) Log(err error) {
+	tl.t.Log(renderString(err, bold))
+}
+
+// Error signal an error.
+func (tl TestLog) Error(err error) {
+	tl.t.Error(renderString(err, red))
+}
+
 // Log logs error.
 func Log(t TestingPrinter, err error) {
 	t.Log(renderString(err, bold))
