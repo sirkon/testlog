@@ -1,9 +1,12 @@
 package testlog
 
 import (
-	"encoding/json"
-	"github.com/sirkon/errors"
+	"fmt"
+	"go/token"
+	"runtime"
 	"strings"
+
+	"github.com/sirkon/errors"
 )
 
 const (
@@ -25,22 +28,22 @@ func New(t TestingPrinter) TestLog {
 
 // Log logs an error.
 func (tl TestLog) Log(err error) {
-	tl.t.Log(renderString(err, bold))
+	_, _ = fmt.Fprintln(tl.t.Output(), renderString(err, bold))
 }
 
 // Error signal an error.
 func (tl TestLog) Error(err error) {
-	tl.t.Error(renderString(err, red))
+	_, _ = fmt.Fprintln(tl.t.Output(), renderString(err, red))
 }
 
 // Log logs error.
 func Log(t TestingPrinter, err error) {
-	t.Log(renderString(err, bold))
+	_, _ = fmt.Fprintln(t.Output(), renderString(err, bold))
 }
 
 // Error signal error.
 func Error(t TestingPrinter, err error) {
-	t.Error(renderString(err, red))
+	_, _ = fmt.Fprintln(t.Output(), renderString(err, red))
 }
 
 // Check do nothing and return false if error is nil.
@@ -50,16 +53,21 @@ func Check(t TestingPrinter, err error) bool {
 		return false
 	}
 
-	t.Error(renderString(err, red))
+	_, _ = fmt.Fprintln(t.Output(), renderString(err, red))
 	return true
 }
 
 func renderString(err error, highlight string) string {
+	_, fn, line, _ := runtime.Caller(2)
+	pos := token.Position{Filename: fn, Line: line}
+
 	if err == nil {
-		return "<nil>"
+		return pos.String() + ": <nil>"
 	}
 
 	var b strings.Builder
+	b.WriteString(pos.String())
+	b.WriteByte(' ')
 	b.WriteString(highlight)
 	b.WriteString(err.Error())
 	b.WriteString("\033[0m")
@@ -72,26 +80,29 @@ func renderString(err error, highlight string) string {
 	var c errorContextConsumer
 	d.Deliver(&c)
 
-	if len(c.vars) == 0 {
-		return b.String()
-	}
+	b.WriteByte('\n')
+	origIdent := "    "
+	for _, level := range c.levels {
+		ident := origIdent
+		b.WriteString(ident)
+		b.WriteString(level.what)
+		b.WriteByte('\n')
 
-	b.WriteString("\t{")
-	for i, v := range c.vars {
-		if i > 0 {
-			b.WriteString(", ")
+		ident += "  "
+		if level.loc != "" {
+			b.WriteString(ident)
+			b.WriteString("@location: ")
+			b.WriteString(level.loc)
+			b.WriteByte('\n')
 		}
-
-		b.WriteByte('"')
-		b.WriteString(v.name)
-		b.WriteString(`":`)
-		val, err := json.Marshal(v.value)
-		if err != nil {
-			panic(errors.Wrap(err, "marshal context value "+v.name))
+		for _, v := range level.vars {
+			b.WriteString(ident)
+			b.WriteString(v.name)
+			b.WriteString(": ")
+			b.WriteString(fmt.Sprint(v.value))
+			b.WriteByte('\n')
 		}
-		b.Write(val)
 	}
-	b.WriteByte('}')
 
 	return b.String()
 }

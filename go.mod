@@ -1,5 +1,5 @@
 module github.com/sirkon/testlog
 
-go 1.18
+go 1.25
 
-require github.com/sirkon/errors v0.2.1
+require github.com/sirkon/errors v1.0.0

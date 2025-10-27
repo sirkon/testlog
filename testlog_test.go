@@ -2,9 +2,11 @@ package testlog_test
 
 import (
 	stderrs "errors"
-	"github.com/sirkon/errors"
-	"github.com/sirkon/testlog"
 	"testing"
+
+	"github.com/sirkon/errors"
+
+	"github.com/sirkon/testlog"
 )
 
 func TestLogging(t *testing.T) {

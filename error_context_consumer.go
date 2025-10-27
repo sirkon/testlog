@@ -1,9 +1,58 @@
 package testlog
 
-import "github.com/sirkon/errors"
+import (
+	"go/token"
+
+	"github.com/sirkon/errors"
+)
 
 type errorContextConsumer struct {
+	vars   []contextVar
+	levels []consLevel
+}
+
+type consLevel struct {
+	what string
+	loc  string
 	vars []contextVar
+}
+
+func (c *errorContextConsumer) NextLink() {
+	c.vars = nil
+}
+
+func (c *errorContextConsumer) Flt32(name string, value float32) {
+	c.vars = append(c.vars, contextVar{name, value})
+}
+
+func (c *errorContextConsumer) Flt64(name string, value float64) {
+	c.vars = append(c.vars, contextVar{name, value})
+}
+
+func (c *errorContextConsumer) Str(name string, value string) {
+	c.vars = append(c.vars, contextVar{name, value})
+}
+
+func (c *errorContextConsumer) SetLinkInfo(loc token.Position, descr errors.ErrorChainLinkDescriptor) {
+	var what string
+	switch t := descr.(type) {
+	case errors.ErrorChainLinkNew:
+		what = "NEW: " + string(t)
+	case errors.ErrorChainLinkWrap:
+		what = "WRAP: " + string(t)
+	case errors.ErrorChainLinkContext:
+		what = "CTX"
+	}
+	var l string
+	if loc.IsValid() {
+		l = loc.String()
+	}
+	c.levels = append(c.levels, consLevel{
+		what: what,
+		loc:  l,
+		vars: c.vars,
+	})
+	c.vars = nil
 }
 
 // Bool to satisfy errors.ErrorContextConsumer

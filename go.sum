@@ -1,2 +1,4 @@
 github.com/sirkon/errors v0.2.1 h1:cbf0gEEpnSsnw3BoZzKubrBYhLohmyB1LgWB+sGedT0=
 github.com/sirkon/errors v0.2.1/go.mod h1:QHzAIbAhNXYSz3uK9tvp99vPxroQWjNz4PbRg8Ef3Wc=
+github.com/sirkon/errors v1.0.0 h1:WONUn4CTrinYngfxgWiCdT4UQjs2xTKwK9gLokXUpik=
+github.com/sirkon/errors v1.0.0/go.mod h1:jeAOfe0x9Wz6m4AMPBdGB95efTXILTTr9ikZ2ymb5zA=
